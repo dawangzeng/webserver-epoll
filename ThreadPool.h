@@ -43,13 +43,13 @@ ThreadPool<T>::ThreadPool(int size):threads(NULL),thread_num(size),is_stop(false
 		if(ret < 0)
 		{
 			cout<<"thread create failed!"<<endl;
-			delete threads;
+			delete[] threads;
 			throw exception();
 		}
 		if(pthread_detach(threads[i]))
 		{
 			cout<<"thread detach failed!"<<endl;
-			delete threads;
+			delete[] threads;
 			throw exception();
 		}
 	}
@@ -59,7 +59,7 @@ ThreadPool<T>::~ThreadPool()
 {
 	is_stop = true;
 	queue_cond_locker.broadcast();//广播通知所有线程结束
-	delete threads;
+	delete[] threads;
 }
 template<typename T>
 void * ThreadPool<T>::worker(void *param)

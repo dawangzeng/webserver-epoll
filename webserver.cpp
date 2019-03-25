@@ -18,6 +18,7 @@ void addepoll(int epollfd,int fd){
 
 int WebServer::start()
 {
+//	signal( SIGPIPE, SIG_IGN  );
 	//初始化服务地址
 	server.sin_family = AF_INET;
 	server.sin_port = htons(port);
@@ -37,7 +38,7 @@ int WebServer::start()
 		exit(-1);
 	}
 	//监听套接字
-	ret = listen(listenfd,2000);
+	ret = listen(listenfd,200);
 	if(ret<0)
 	{
 		cerr<<"listen error"<<endl;
@@ -45,8 +46,15 @@ int WebServer::start()
 	}
 	cout<<"server listening...."<<endl;
 
+	//创建线程池
+	ThreadPool<Task> pool(10);
 	//创建epoll
 	epollfd = epoll_create(2000);
+	if( epollfd < 0  ) {
+		 cout << "epoll_create error, line: " << __LINE__ << endl;
+		 exit(-1);
+						    
+	}
 	epoll_event events[MAX_EVENT_COUNT];
 	//将监听套接字加入到epoll中
 	epoll_event event;
@@ -54,14 +62,11 @@ int WebServer::start()
 	event.events = EPOLLIN | EPOLLHUP;
 	epoll_ctl(epollfd,EPOLL_CTL_ADD,listenfd,&event);
 
-	//创建线程池
-	ThreadPool<Task> pool(100);
 
 	//循环处理
 	for(;;)
 	{
 		//epoll等待事件
-		cout<<"Looping..."<<endl;
 		ret = epoll_wait(epollfd,events,MAX_EVENT_COUNT,-1);
 		if(ret < 0)
 		{
@@ -82,14 +87,15 @@ int WebServer::start()
 					continue;
 				}
 				cout<<"new connection.."<<endl;
-				addepoll(epollfd,fd);
+				addepoll(epollfd,conn);
 			}else if(events[i].events &(EPOLLHUP | EPOLLRDHUP |EPOLLERR))
 			{
 				deletefd(epollfd,fd);
 			}else if(events[i].events & EPOLLIN)//有数据可以读
 			{
+				cout<<"epollin"<<endl;
 				Task *task =  new Task(epollfd,fd);
-				cout<<"pool add.."<<endl;
+				cout<<"pool add.. "<<fd<<endl;
 				pool.append(task);
 			}else
 			{

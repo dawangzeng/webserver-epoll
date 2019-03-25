@@ -46,7 +46,7 @@ int Task::handle_get(const string &uri,int start)
 {
 	string filename = uri.substr(1);
 	if(uri == "/" || uri == "/index.html")
-		send_file(filename,"text/html",start);
+		send_file("index.html","text/html",start);
 	else if(uri.find(".jpg") != string::npos || uri.find(".png") != string::npos)
 		send_file(filename,"image/jpg",start);
 	else if(uri.find(".html") != string::npos)
