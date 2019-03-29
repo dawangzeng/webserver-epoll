@@ -39,7 +39,7 @@ void Task::Done()
 
 		break;//退出循环
 	}
-	close(conn_fd);//关闭连接套接字，虽然析构函数也执行了
+//	close(conn_fd);//关闭连接套接字，虽然析构函数也执行了
 }
 
 int Task::handle_get(const string &uri,int start)
@@ -66,8 +66,9 @@ int Task::send_file(const string &filename,const string &type,int start,const in
 		send_file("html/404.html","text/html",0,404,"NOT FOUND");
 		return -1;
 	}
-	char header[100];
+	char header[250];
 	sprintf(header,"HTTP/1.1 %d %s\r\nServer: funnyserver\r\nContent-Length: %d\r\nContent-Type: %s;charset:utf-8\r\n\r\n", status, info.c_str(), int(filestat.st_size - start), type.c_str());
+	cout<<"header size:"<<strlen(header)<<endl;
 	send(conn_fd,header,strlen(header),0);
 	int sum = start;
 	int fd = open(filename.c_str(),O_RDONLY);

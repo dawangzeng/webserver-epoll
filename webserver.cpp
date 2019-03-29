@@ -1,5 +1,5 @@
 #include "webserver.h"
-
+#include<signal.h>
 //设置套接字为非阻塞状态
 void setnoblocking(int fd){
 	int old_op =  fcntl(fd,F_GETFL);
@@ -18,7 +18,7 @@ void addepoll(int epollfd,int fd){
 
 int WebServer::start()
 {
-//	signal( SIGPIPE, SIG_IGN  );
+	signal(SIGPIPE, SIG_IGN);
 	//初始化服务地址
 	server.sin_family = AF_INET;
 	server.sin_port = htons(port);
@@ -47,7 +47,7 @@ int WebServer::start()
 	cout<<"server listening...."<<endl;
 
 	//创建线程池
-	ThreadPool<Task> pool(10);
+	ThreadPool<Task> pool(100);
 	//创建epoll
 	epollfd = epoll_create(2000);
 	if( epollfd < 0  ) {
