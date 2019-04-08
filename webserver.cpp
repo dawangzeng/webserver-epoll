@@ -49,7 +49,7 @@ int WebServer::start()
 	//创建线程池
 	ThreadPool<Task> pool(100);
 	//创建epoll
-	epollfd = epoll_create(2000);
+	epollfd = epoll_create(3000);
 	if( epollfd < 0  ) {
 		 cout << "epoll_create error, line: " << __LINE__ << endl;
 		 exit(-1);

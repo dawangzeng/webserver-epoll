@@ -31,6 +31,8 @@ void Task::Done()
 
 		if(method == "GET")
 			handle_get(uri);
+		else if(method == "POST")
+			handle_post(uri,buff);
 		else
 		{
 			string status="HTTP/1.1 501 Not Implemented\r\nContent-Type: text/plain;charset=utf-8\r\n\r\n";
@@ -46,7 +48,7 @@ int Task::handle_get(const string &uri,int start)
 {
 	string filename = uri.substr(1);
 	if(uri == "/" || uri == "/index.html")
-		send_file("index.html","text/html",start);
+		send_file("html/index.html","text/html",start);
 	else if(uri.find(".jpg") != string::npos || uri.find(".png") != string::npos)
 		send_file(filename,"image/jpg",start);
 	else if(uri.find(".html") != string::npos)
@@ -54,6 +56,46 @@ int Task::handle_get(const string &uri,int start)
 	else 
 		send_file(filename,"text/plain",start);
 
+	return 0;
+}
+int Task::handle_post(const string &uri, char *buff)
+{
+	string filename = uri.substr(1);
+	cout<<"filename:"<<filename<<endl;
+	cout<<"buff:"<<buff<<endl;
+	if(uri.find("login") != string::npos)
+	{
+		int len ;
+		char *temp = buff;
+		char * p = strstr(buff,"Content-Length:");
+		if(p != NULL){
+			sscanf(p,"Content-Length:%d",&len);
+			char username[30];
+			char password[30];
+			len = strlen(buff) - len;
+			p = temp + len;
+			sscanf(p,"username=%[^&]%*[^=]=%s",username,password);
+			cout<<"username:"<<username<<" password:"<<password<<endl;
+			char param[100];
+			sprintf(param,"%s %s %d",username,password,conn_fd);
+			cout<<"Param:"<<param<<endl;
+			if(fork() == 0)
+			{
+				cout<<"in child"<<endl;
+				execl(filename.c_str(),param,NULL);
+			}
+			else
+				wait(NULL);
+
+		}else
+		{
+			cerr<<"not found Content-Length"<<endl;
+			return -1;
+		}
+	}else
+	{
+		 send_file( "html/404.html", "text/html", 0, 404, "Not Found"  );
+	}
 	return 0;
 }
 int Task::send_file(const string &filename,const string &type,int start,const int status,const string info)

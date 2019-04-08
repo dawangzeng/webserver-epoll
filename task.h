@@ -16,6 +16,7 @@
 #include<string>
 #include<errno.h>
 #include<sys/epoll.h>
+#include<wait.h>
 using namespace std;
 
 const int buff_size = 1024;
@@ -32,7 +33,8 @@ class Task
 		void Done();
 		int send_file(const string &filename,const string &type,int start,const int status =200,const string info="OK");
 		int handle_get(const string &uri,int start =0);
-		int get_filesize(const string &filename);
+	//	int get_filesize(const string &filename);
+		int handle_post(const string &uri, char *buff);
 };
 
 

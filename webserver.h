@@ -4,7 +4,7 @@
 #include "ThreadPool.h"
 using namespace std;
 
-const int MAX_EVENT_COUNT = 1000;
+const int MAX_EVENT_COUNT = 200;
 class WebServer
 {
 	private:
